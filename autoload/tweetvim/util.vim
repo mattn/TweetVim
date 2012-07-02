@@ -30,7 +30,7 @@ endfunction
 "
 function! tweetvim#util#separator(s)
   let sep = ""
-  while len(sep) < tweetvim#util#bufwidth()
+  while len(sep) < tweetvim#util#bufwidth() - 2
     let sep .= a:s
   endwhile
   return sep

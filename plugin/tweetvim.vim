@@ -38,6 +38,9 @@ call s:set_global_variable('tweetvim_open_buffer_cmd' , 'edit!')
 if !isdirectory(g:tweetvim_config_dir)
   call mkdir(g:tweetvim_config_dir, 'p')
 endif
+if !isdirectory(g:tweetvim_config_dir . '/ico')
+  call mkdir(g:tweetvim_config_dir . '/ico', 'p')
+endif
 "
 "
 "

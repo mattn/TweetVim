@@ -205,11 +205,46 @@ function! s:append_tweets(tweets, cache)
   let separator = tweetvim#util#separator('-')
   let today     = tweetvim#util#today()
   " filter tweets
+  execute "cd " . g:tweetvim_config_dir . '/ico'
+  let cmds  = []
   for tweet in tweetvim#filter#execute(a:tweets)
     " cache tweet by line no
     let a:cache[line(".")] = tweet
     call append(line('$') - 1, s:format(tweet, today))
     call append(line('$') - 1, separator)
+
+    let screen_name = tweet.user.screen_name
+    if has_key(tweet.user, 'profile_image_url')
+      let img_url     = tweet.user.profile_image_url
+    else
+      let img_url     = tweet.profile_image_url
+    endif
+    let ico_path    = g:tweetvim_config_dir . '/ico/' . screen_name  . ".ico"
+    let file_name   = fnamemodify(img_url, ":t")
+
+    if !filereadable(ico_path)
+      echo "downloading ... " . img_url
+      call system("curl -L -O " . img_url)
+      call system("convert " . fnamemodify(img_url, ":t") . " " . ico_path)
+      call delete(file_name)
+      redraw
+    end
+
+
+    call add(cmds, ":sign define tweetvim_icon_" . screen_name . " icon=" . ico_path)
+    call add(cmds, ":sign place 1 line=" . (line(".") - 2) . " name=tweetvim_icon_" . screen_name . " buffer=" . bufnr("%"))
+
+"    echomsg ":sign define tweetvim_icon_" . screen_name . " icon=" . ico_path
+"    echomsg ":sign place " . place . " line=" . line(".") . " name=tweetvim_icon_" . screen_name . " buffer=" . bufnr("%")
+
+  endfor
+
+  for cmd in cmds
+    try
+      execute cmd
+    catch
+      echomsg v:errmsg
+    endtry
   endfor
 endfunction
 "
@@ -229,7 +264,8 @@ function! s:format(tweet, ...)
 
   let today = a:0 ? a:1 : tweetvim#util#today()
 
-  let str  = tweetvim#util#padding(a:tweet.user.screen_name, 15) . ' : '
+  "let str  = ' ' . tweetvim#util#padding(a:tweet.user.screen_name, 15) . ' : '
+  let str  = ' '
   " TODO
   if a:tweet.favorited && !has_key(a:tweet, 'retweeted_status')
     let str .= '★ '
