@@ -69,6 +69,8 @@ function! tweetvim#buffer#replace(lineno, tweet)
   call append(a:lineno - 1, type(a:tweet) == 4 ? s:format(a:tweet) : a:tweet)
   setlocal nomodified
   setlocal nomodifiable
+  setlocal nonu
+  hi Signcolumn guibg=bg
   call cursor(lineno, colno)
 endfunction
 "
